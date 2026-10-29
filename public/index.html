@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-density="comfortable">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support Desk — Luxury Ticket Management</title>
+  <meta name="description" content="Production-quality support ticketing system with Emerald & Champagne aesthetic.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20%220%22%20%22100%22%20%22100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+
+  <!-- Immediate Theme Initializer (prevents flash of unstyled content) -->
+  <script>
+    (function() {
+      try {
+        const saved = localStorage.getItem('support_desk_theme');
+        let theme = saved;
+        if (!theme) {
+          theme = 'dark'; // Dark is default
+          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            theme = 'light';
+          }
+        }
+        document.documentElement.setAttribute('data-theme', theme || 'dark');
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- Typography: Cormorant Garamond & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Offline Alert Banner (Appears if connection drops) -->
+  <div class="offline-banner" id="offline-banner" hidden>
+    <i data-lucide="wifi-off" style="width: 16px; height: 16px;"></i>
+    <span>You are currently offline. Changes will sync when your connection is restored.</span>
+  </div>
+
+  <!-- New Tickets Floating Pill -->
+  <div class="new-tickets-pill" id="new-tickets-pill" hidden>
+    <i data-lucide="arrow-up" style="width: 14px; height: 14px;"></i>
+    <span>New tickets available — Click to refresh</span>
+  </div>
+
+  <!-- =========================================================================
+       Sticky Glass-Blur Header
+       ========================================================================= -->
+  <header class="app-header">
+    <div class="header-inner">
+      <!-- Brand -->
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <span class="brand-title">Support Desk</span>
+        <span class="brand-badge">PRO</span>
+      </div>
+
+      <!-- Global Search with "/" hint & Live Suggestions Popover -->
+      <div class="header-search">
+        <div class="search-input-wrap">
+          <i data-lucide="search" class="search-icon" aria-hidden="true"></i>
+          <input
+            type="search"
+            id="header-search-input"
+            class="header-search-input"
+            placeholder="Search tickets by title, body, or requester… (/)"
+            autocomplete="off"
+            aria-label="Search tickets"
+          >
+          <button type="button" id="header-search-clear" class="search-clear-btn" aria-label="Clear search" hidden>
+            <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+          </button>
+          <kbd class="search-shortcut" title="Press / to focus search">/</kbd>
+        </div>
+        <!-- Search suggestions dropdown -->
+        <div class="search-suggestions-popover" id="search-suggestions-popover" hidden></div>
+      </div>
+
+      <!-- Header Action Controls -->
+      <div class="header-actions">
+        <!-- Live System Status -->
+        <div class="status-dot-wrap" title="Backend Status">
+          <span class="pulse-dot"></span>
+          <span>Live</span>
+        </div>
+
+        <!-- Command Palette Trigger -->
+        <button type="button" id="btn-open-palette" class="btn btn-secondary btn-sm" title="Command Palette (Ctrl/Cmd+K)">
+          <i data-lucide="terminal" style="width: 14px; height: 14px;"></i>
+          <span style="font-family: var(--font-mono); font-size: 0.6875rem;">⌘K</span>
+        </button>
+
+        <!-- Theme Toggle (Light/Dark) -->
+        <button type="button" id="btn-theme-toggle" class="btn-icon" aria-label="Toggle dark mode" title="Toggle Light / Dark mode">
+          <i data-lucide="moon" id="icon-theme-moon" style="width: 16px; height: 16px;"></i>
+          <i data-lucide="sun" id="icon-theme-sun" style="width: 16px; height: 16px;" hidden></i>
+        </button>
+
+        <!-- Density Toggle (Comfortable / Compact) -->
+        <button type="button" id="btn-density-toggle" class="btn-icon" aria-label="Toggle density" title="Comfortable / Compact Density">
+          <i data-lucide="align-justify" style="width: 16px; height: 16px;"></i>
+        </button>
+
+        <!-- Shortcuts Help Modal Trigger (?) -->
+        <button type="button" id="btn-shortcuts-help" class="btn-icon" aria-label="Keyboard shortcuts" title="Keyboard Shortcuts (?)">
+          <i data-lucide="help-circle" style="width: 16px; height: 16px;"></i>
+        </button>
+
+        <!-- Refresh Button -->
+        <button type="button" id="btn-refresh-data" class="btn-icon" aria-label="Refresh" title="Refresh Tickets & Stats">
+          <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+        </button>
+
+        <!-- + New Ticket Button -->
+        <button type="button" id="btn-header-new-ticket" class="btn btn-primary">
+          <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+          <span>New Ticket</span>
+          <span class="btn-kbd-badge" title="Shortcut: Press 'N'">N</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       Main Workspace
+       ========================================================================= -->
+  <main class="main-container">
+    <!-- Dashboard Section (KPIs + SVG Analytics) -->
+    <section class="dashboard-section" aria-label="Support analytics">
+      <div class="dashboard-header">
+        <span class="dashboard-heading">Analytics & Queues</span>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-toggle-dashboard">
+          Hide Analytics
+        </button>
+      </div>
+
+      <div id="dashboard-collapsible-content">
+        <!-- 5 KPI Cards with Sparklines -->
+        <div class="kpi-row">
+          <!-- 1. Open -->
+          <button type="button" class="kpi-card" data-kpi-type="status" data-kpi-val="open" id="kpi-card-open" title="Click to filter by Open tickets">
+            <div class="kpi-card-header">
+              <span class="kpi-label">Open</span>
+              <div class="kpi-icon-badge" style="background: var(--status-open-bg); color: var(--status-open-text);">
+                <i data-lucide="inbox"></i>
+              </div>
+            </div>
+            <div class="kpi-content-wrap">
+              <span class="kpi-val" id="kpi-open-val">0</span>
+              <div id="kpi-sparkline-open"></div>
+            </div>
+            <div class="kpi-footer">
+              <span class="badge-dot" style="background: var(--status-open);"></span>
+              <span>Needs initial triage</span>
+            </div>
+          </button>
+
+          <!-- 2. In Progress -->
+          <button type="button" class="kpi-card" data-kpi-type="status" data-kpi-val="in_progress" id="kpi-card-in-progress" title="Click to filter by In Progress tickets">
+            <div class="kpi-card-header">
+              <span class="kpi-label">In Progress</span>
+              <div class="kpi-icon-badge" style="background: var(--status-in-progress-bg); color: var(--status-in-progress-text);">
+                <i data-lucide="clock"></i>
+              </div>
+            </div>
+            <div class="kpi-content-wrap">
+              <span class="kpi-val" id="kpi-in-progress-val">0</span>
+              <div id="kpi-sparkline-in-progress"></div>
+            </div>
+            <div class="kpi-footer">
+              <span class="badge-dot" style="background: var(--status-in-progress);"></span>
+              <span>Active investigation</span>
+            </div>
+          </button>
+
+          <!-- 3. Resolved -->
+          <button type="button" class="kpi-card" data-kpi-type="status" data-kpi-val="resolved" id="kpi-card-resolved" title="Click to filter by Resolved tickets">
+            <div class="kpi-card-header">
+              <span class="kpi-label">Resolved</span>
+              <div class="kpi-icon-badge" style="background: var(--status-resolved-bg); color: var(--status-resolved-text);">
+                <i data-lucide="check-circle-2"></i>
+              </div>
+            </div>
+            <div class="kpi-content-wrap">
+              <span class="kpi-val" id="kpi-resolved-val">0</span>
+              <div id="kpi-sparkline-resolved"></div>
+            </div>
+            <div class="kpi-footer">
+              <span class="badge-dot" style="background: var(--status-resolved);"></span>
+              <span>Solution provided</span>
+            </div>
+          </button>
+
+          <!-- 4. Urgent -->
+          <button type="button" class="kpi-card" data-kpi-type="priority" data-kpi-val="urgent" id="kpi-card-urgent" title="Click to filter by Urgent priority">
+            <div class="kpi-card-header">
+              <span class="kpi-label">Urgent</span>
+              <div class="kpi-icon-badge" style="background: var(--priority-urgent-bg); color: var(--priority-urgent-text);">
+                <i data-lucide="alert-triangle"></i>
+              </div>
+            </div>
+            <div class="kpi-content-wrap">
+              <span class="kpi-val" id="kpi-urgent-val">0</span>
+              <div id="kpi-sparkline-urgent"></div>
+            </div>
+            <div class="kpi-footer">
+              <span class="badge-dot" style="background: var(--priority-urgent);"></span>
+              <span>Critical priority queue</span>
+            </div>
+          </button>
+
+          <!-- 5. Overdue -->
+          <button type="button" class="kpi-card" data-kpi-type="overdue" data-kpi-val="true" id="kpi-card-overdue" title="Click to toggle Overdue tickets">
+            <div class="kpi-card-header">
+              <span class="kpi-label">Overdue</span>
+              <div class="kpi-icon-badge" style="background: var(--alert-overdue-bg); color: var(--alert-overdue-text);">
+                <i data-lucide="alert-octagon"></i>
+              </div>
+            </div>
+            <div class="kpi-content-wrap">
+              <span class="kpi-val" id="kpi-overdue-val">0</span>
+              <div id="kpi-sparkline-overdue"></div>
+            </div>
+            <div class="kpi-footer">
+              <span class="badge-dot" style="background: var(--alert-overdue);"></span>
+              <span>Breached SLA target</span>
+            </div>
+          </button>
+        </div>
+
+        <!-- Inline SVG Charts Panel (14-day Created vs Resolved Area + Priority Donut) -->
+        <div class="charts-panel" style="margin-top: 14px;">
+          <!-- 14-day Area Chart -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <span class="chart-title">14-Day Activity (Created vs Resolved)</span>
+              <div class="chart-legend">
+                <span class="legend-item"><span class="legend-color-dot" style="background: var(--primary);"></span> Created</span>
+                <span class="legend-item"><span class="legend-color-dot" style="background: var(--success);"></span> Resolved</span>
+              </div>
+            </div>
+            <div class="svg-chart-container" id="timeline-chart-container">
+              <!-- Rendered via JS charts.js -->
+            </div>
+          </div>
+
+          <!-- Priority Donut Chart -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <span class="chart-title">Priority Breakdown</span>
+            </div>
+            <div id="donut-chart-container">
+              <!-- Rendered via JS charts.js -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toolbar: Filters, Date Presets, Saved Views, View Switcher -->
+    <section class="toolbar-section" aria-label="Toolbar filters and controls">
+      <div class="toolbar-main">
+        <!-- Multi-Select Popovers -->
+        <div class="toolbar-filters">
+          <!-- Status Filter Popover -->
+          <div style="position: relative;">
+            <button type="button" class="btn btn-secondary btn-sm popover-trigger-btn" id="btn-filter-status" aria-expanded="false">
+              <i data-lucide="circle-dot" style="width: 14px; height: 14px;"></i>
+              <span id="filter-status-label">Status</span>
+              <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
+            </button>
+            <div class="filter-popover" id="popover-filter-status" hidden style="position: absolute; top: calc(100% + 4px); left: 0; background: var(--bg-surface-elevated); border: 1px solid var(--border-base); border-radius: var(--radius-md); box-shadow: var(--shadow-popover); padding: 8px; z-index: var(--z-popover); min-width: 150px; display: flex; flex-direction: column; gap: 6px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; cursor: pointer; padding: 4px;">
+                <input type="checkbox" value="open" class="ticket-checkbox">
+                <span>Open</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; cursor: pointer; padding: 4px;">
+                <input type="checkbox" value="in_progress" class="ticket-checkbox">
+                <span>In Progress</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; cursor: pointer; padding: 4px;">
+                <input type="checkbox" value="resolved" class="ticket-checkbox">
+                <span>Resolved</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; cursor: pointer; padding: 4px;">
+                <input type="checkbox" value="closed" class="ticket-checkbox">
+                <span>Closed</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Priority Filter Popover -->
+          <div style="position: relative;">
+            <button type="button" class="btn btn-secondary btn-sm popover-trigger-btn" id="btn-filter-priority" aria-expanded="false">
+              <i data-lucide="flag" style="width: 14px; height: 14px;"></i>
+              <span id="filter-priority-label">Priority</span>
+              <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
+            </button>
+            <div class="filter-popover" id="popover-filter-priority" hidden style="position: absolute; top: calc(100% + 4px); left: 0; background: var(--bg-surface-elevated); border: 1px solid var(--border-base); border-radius: var(--radius-md); box-shadow: var(--shadow-popover); padding: 8px; z-index: var(--z-popover); min-width: 150px; display: flex; flex-direction: column; gap: 6px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; cursor: pointer; padding: 4px;">
+                <input type="checkbox" value="low" class="ticket-checkbox">
+                <span>Low</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; cursor: pointer; padding: 4px;">
+                <input type="checkbox" value="medium" class="ticket-checkbox">
+                <span>Medium</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; cursor: pointer; padding: 4px;">
+                <input type="checkbox" value="high" class="ticket-checkbox">
+                <span>High</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; cursor: pointer; padding: 4px;">
+                <input type="checkbox" value="urgent" class="ticket-checkbox">
+                <span>Urgent</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Category Filter Popover -->
+          <div style="position: relative;">
+            <button type="button" class="btn btn-secondary btn-sm popover-trigger-btn" id="btn-filter-category" aria-expanded="false">
+              <i data-lucide="tag" style="width: 14px; height: 14px;"></i>
+              <span id="filter-category-label">Category</span>
+              <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
+            </button>
+            <div class="filter-popover" id="popover-filter-category" hidden style="position: absolute; top: calc(100% + 4px); left: 0; background: var(--bg-surface-elevated); border: 1px solid var(--border-base); border-radius: var(--radius-md); box-shadow: var(--shadow-popover); padding: 8px; z-index: var(--z-popover); min-width: 160px; display: flex; flex-direction: column; gap: 6px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; cursor: pointer; padding: 4px;">
+                <input type="checkbox" value="bug" class="ticket-checkbox">
+                <span>Bug Report</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; cursor: pointer; padding: 4px;">
+                <input type="checkbox" value="billing" class="ticket-checkbox">
+                <span>Billing & Payment</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; cursor: pointer; padding: 4px;">
+                <input type="checkbox" value="feature_request" class="ticket-checkbox">
+                <span>Feature Request</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; cursor: pointer; padding: 4px;">
+                <input type="checkbox" value="general" class="ticket-checkbox">
+                <span>General Inquiry</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Date Range & Presets Popover -->
+          <div style="position: relative;">
+            <button type="button" class="btn btn-secondary btn-sm popover-trigger-btn" id="btn-filter-date" aria-expanded="false">
+              <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+              <span id="filter-date-label">Date Range</span>
+              <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
+            </button>
+            <div class="filter-popover" id="popover-filter-date" hidden style="position: absolute; top: calc(100% + 4px); left: 0; background: var(--bg-surface-elevated); border: 1px solid var(--border-base); border-radius: var(--radius-md); box-shadow: var(--shadow-popover); padding: 12px; z-index: var(--z-popover); width: 260px; display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; gap: 6px;">
+                <button type="button" class="btn btn-secondary btn-sm date-preset-btn" data-preset="today" style="flex:1;">Today</button>
+                <button type="button" class="btn btn-secondary btn-sm date-preset-btn" data-preset="7d" style="flex:1;">7d</button>
+                <button type="button" class="btn btn-secondary btn-sm date-preset-btn" data-preset="30d" style="flex:1;">30d</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.6875rem; font-weight: 600; color: var(--text-secondary);">From:</label>
+                <input type="date" id="date-from-input" class="control-input" style="height: 30px; font-size: 0.75rem; padding: 0 6px;">
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.6875rem; font-weight: 600; color: var(--text-secondary);">To:</label>
+                <input type="date" id="date-to-input" class="control-input" style="height: 30px; font-size: 0.75rem; padding: 0 6px;">
+              </div>
+              <div style="display: flex; justify-content: flex-end; gap: 6px; padding-top: 6px; border-top: 1px solid var(--border-subtle);">
+                <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-date-filter">Clear</button>
+                <button type="button" class="btn btn-primary btn-sm" id="btn-apply-custom-date">Apply</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overdue Only Toggle Checkbox -->
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8125rem; font-weight: 500; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="toggle-overdue-only" class="ticket-checkbox">
+            <span style="color: var(--alert-overdue-text);">Overdue only</span>
+          </label>
+        </div>
+
+        <!-- Saved Views, View Switcher & CSV Export -->
+        <div class="toolbar-actions">
+          <!-- Saved Views Menu -->
+          <div class="saved-views-wrap">
+            <button type="button" class="btn btn-secondary btn-sm popover-trigger-btn" id="btn-saved-views" aria-expanded="false">
+              <i data-lucide="bookmark" style="width: 14px; height: 14px;"></i>
+              <span>Saved Views</span>
+              <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
+            </button>
+            <div class="filter-popover" id="popover-saved-views" hidden style="position: absolute; top: calc(100% + 4px); right: 0; background: var(--bg-surface-elevated); border: 1px solid var(--border-base); border-radius: var(--radius-md); box-shadow: var(--shadow-popover); padding: 8px; z-index: var(--z-popover); width: 220px; display: flex; flex-direction: column; gap: 4px;">
+              <div id="saved-views-list"></div>
+              <div style="padding-top: 6px; border-top: 1px solid var(--border-subtle); margin-top: 4px;">
+                <button type="button" class="btn btn-ghost btn-sm" id="btn-save-current-view" style="width: 100%; justify-content: flex-start;">
+                  <i data-lucide="plus" style="width: 12px; height: 12px;"></i>
+                  <span>Save Current View…</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- View Mode Switcher (Table | Board | Compact) -->
+          <div class="view-mode-switcher" role="radiogroup" aria-label="View switcher">
+            <button type="button" class="view-btn active" id="btn-view-table" role="radio" aria-checked="true" title="Table view">
+              <i data-lucide="table"></i>
+              <span>Table</span>
+            </button>
+            <button type="button" class="view-btn" id="btn-view-board" role="radio" aria-checked="false" title="Kanban board view">
+              <i data-lucide="kanban"></i>
+              <span>Board</span>
+            </button>
+            <button type="button" class="view-btn" id="btn-view-compact" role="radio" aria-checked="false" title="Compact list view">
+              <i data-lucide="list"></i>
+              <span>List</span>
+            </button>
+          </div>
+
+          <!-- Export CSV -->
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-export-csv" title="Export tickets as CSV">
+            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+            <span>Export CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Filter Chips Bar -->
+      <div class="active-chips-row" id="active-chips-bar" hidden>
+        <span class="chip-label-prefix">Filtered by:</span>
+        <div id="active-chips-list" style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;"></div>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-all-chips" style="font-size: 0.75rem; color: var(--primary);">
+          Clear all
+        </button>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         Views Display: Table, Kanban Board, Compact List
+         ======================================================================= -->
+    <section class="views-wrapper" aria-label="Tickets display">
+      <!-- 1. Table View -->
+      <div id="panel-table-view">
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="tickets-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;">
+                    <input type="checkbox" id="select-all-tickets" class="ticket-checkbox" aria-label="Select all tickets">
+                  </th>
+                  <th scope="col">Ticket #</th>
+                  <th scope="col">Title & Requester</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Priority</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Assignee</th>
+                  <th scope="col">Created</th>
+                  <th scope="col">SLA Status</th>
+                  <th scope="col" style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tickets-tbody">
+                <!-- Rendered by table.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Board View (Kanban) -->
+      <div id="panel-board-view" hidden>
+        <div class="kanban-board">
+          <!-- Open -->
+          <div class="kanban-column" data-status="open">
+            <div class="kanban-col-header">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="badge-dot" style="background: var(--status-open);"></span>
+                <span style="font-size: 0.8125rem; font-weight: 600;">Open</span>
+              </div>
+              <span class="col-count" id="count-col-open">0</span>
+            </div>
+            <div class="kanban-card-list" id="card-list-open"></div>
+          </div>
+
+          <!-- In Progress -->
+          <div class="kanban-column" data-status="in_progress">
+            <div class="kanban-col-header">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="badge-dot" style="background: var(--status-in-progress);"></span>
+                <span style="font-size: 0.8125rem; font-weight: 600;">In Progress</span>
+              </div>
+              <span class="col-count" id="count-col-in-progress">0</span>
+            </div>
+            <div class="kanban-card-list" id="card-list-in-progress"></div>
+          </div>
+
+          <!-- Resolved -->
+          <div class="kanban-column" data-status="resolved">
+            <div class="kanban-col-header">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="badge-dot" style="background: var(--status-resolved);"></span>
+                <span style="font-size: 0.8125rem; font-weight: 600;">Resolved</span>
+              </div>
+              <span class="col-count" id="count-col-resolved">0</span>
+            </div>
+            <div class="kanban-card-list" id="card-list-resolved"></div>
+          </div>
+
+          <!-- Closed -->
+          <div class="kanban-column" data-status="closed">
+            <div class="kanban-col-header">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="badge-dot" style="background: var(--status-closed);"></span>
+                <span style="font-size: 0.8125rem; font-weight: 600;">Closed</span>
+              </div>
+              <span class="col-count" id="count-col-closed">0</span>
+            </div>
+            <div class="kanban-card-list" id="card-list-closed"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Compact List View -->
+      <div id="panel-compact-view" hidden>
+        <div class="compact-list-card" id="compact-list-items"></div>
+      </div>
+
+      <!-- Empty State Card -->
+      <div id="panel-empty-state" class="empty-state-card" hidden style="background: var(--surface); border: 1px dashed var(--accent-border); border-radius: var(--radius); padding: 56px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; box-shadow: var(--shadow-sm);">
+        <svg viewBox="0 0 120 120" style="width: 80px; height: 80px;" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="60" cy="60" r="50" stroke="var(--accent-border)" stroke-width="1.5" stroke-dasharray="4 4" fill="color-mix(in srgb, var(--accent) 5%, transparent)"/>
+          <rect x="36" y="42" width="48" height="36" rx="6" stroke="var(--accent)" stroke-width="2" fill="var(--surface-2)"/>
+          <path d="M36 54L60 68L84 54" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="60" cy="42" r="8" stroke="var(--accent)" stroke-width="2" fill="var(--surface)"/>
+          <path d="M57 42H63M60 39V45" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <h3 id="empty-state-title" style="font-family: var(--font-serif); font-size: 1.35rem; font-weight: 600; color: var(--text);">No tickets found</h3>
+        <p id="empty-state-desc" style="max-width: 420px; font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5;">No support tickets match the current criteria.</p>
+        <div style="display: flex; gap: 10px; margin-top: 4px;">
+          <button type="button" class="btn btn-secondary" id="btn-empty-reset-filters">Clear All Filters</button>
+          <button type="button" class="btn btn-primary" id="btn-empty-new-ticket">+ Create Ticket</button>
+        </div>
+      </div>
+
+      <!-- Error State Card -->
+      <div id="panel-error-state" class="empty-state-card" hidden style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 56px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; box-shadow: var(--shadow-sm);">
+        <svg viewBox="0 0 120 120" style="width: 80px; height: 80px;" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="60" cy="60" r="50" stroke="color-mix(in srgb, var(--priority-urgent) 35%, transparent)" stroke-width="1.5" fill="color-mix(in srgb, var(--priority-urgent) 6%, transparent)"/>
+          <path d="M60 34L86 78H34L60 34Z" stroke="var(--priority-urgent)" stroke-width="2" stroke-linejoin="round" fill="var(--surface-2)"/>
+          <line x1="60" y1="50" x2="60" y2="62" stroke="var(--priority-urgent)" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="60" cy="70" r="1.5" fill="var(--priority-urgent)"/>
+        </svg>
+        <h3 style="font-family: var(--font-serif); font-size: 1.35rem; font-weight: 600; color: var(--text);">Unable to connect</h3>
+        <p id="error-state-message" style="max-width: 420px; font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5;">An error occurred communicating with the Support Desk backend.</p>
+        <button type="button" class="btn btn-primary" id="btn-retry-failed-request">Retry Connection</button>
+      </div>
+
+      <!-- Pagination Bar -->
+      <nav class="pagination-bar" id="pagination-bar" aria-label="Pagination">
+        <div class="pagination-info">
+          Showing <strong id="pagination-range-start">1</strong>–<strong id="pagination-range-end">20</strong> of <strong id="pagination-total-count">0</strong> tickets
+        </div>
+        <div class="pagination-controls">
+          <div class="page-size-selector">
+            <span>Show:</span>
+            <select id="page-size-select" class="control-select-sm">
+              <option value="10">10</option>
+              <option value="20" selected>20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div class="pagination-buttons">
+            <button type="button" class="btn-page" id="btn-page-prev" title="Previous page" aria-label="Previous page">
+              <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i>
+            </button>
+            <button type="button" class="btn-page" id="btn-page-next" title="Next page" aria-label="Next page">
+              <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       Floating Bulk Action Bar (Appears on row selection)
+       ========================================================================= -->
+  <div class="bulk-bar" id="bulk-action-bar">
+    <span class="bulk-count-badge" id="bulk-selected-count">0 selected</span>
+    <div class="bulk-divider"></div>
+    <button type="button" class="btn btn-secondary btn-sm" id="btn-bulk-status">Change Status</button>
+    <button type="button" class="btn btn-secondary btn-sm" id="btn-bulk-priority">Change Priority</button>
+    <button type="button" class="btn btn-secondary btn-sm" id="btn-bulk-assign">Assign To</button>
+    <button type="button" class="btn btn-danger btn-sm" id="btn-bulk-delete">Delete</button>
+    <div class="bulk-divider"></div>
+    <button type="button" class="btn btn-ghost btn-sm" id="btn-bulk-clear" title="Clear selection (Esc)">
+      <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+    </button>
+  </div>
+
+  <!-- =========================================================================
+       Ticket Detail Drawer (Slide-in from right)
+       ========================================================================= -->
+  <div class="drawer-backdrop" id="drawer-backdrop" hidden>
+    <aside class="ticket-drawer" id="ticket-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-ticket-number">
+      <!-- Drawer Header -->
+      <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-base); display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="ticket-num-tag" id="drawer-ticket-number" style="font-family: var(--font-mono); font-size: 0.8125rem; font-weight: 700; background: var(--primary-subtle); color: var(--primary); padding: 3px 8px; border-radius: 4px;">TKT-0000</span>
+            <div class="drawer-nav-actions">
+              <button type="button" class="btn-icon" id="btn-drawer-prev" title="Previous ticket (k)" style="width: 28px; height: 28px;">
+                <i data-lucide="chevron-up" style="width: 14px; height: 14px;"></i>
+              </button>
+              <button type="button" class="btn-icon" id="btn-drawer-next" title="Next ticket (j)" style="width: 28px; height: 28px;">
+                <i data-lucide="chevron-down" style="width: 14px; height: 14px;"></i>
+              </button>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button type="button" class="btn-icon" id="btn-drawer-copy-link" title="Copy Deep Link" style="width: 30px; height: 30px;">
+              <i data-lucide="link" style="width: 14px; height: 14px;"></i>
+            </button>
+            <button type="button" class="btn-icon" id="btn-drawer-duplicate" title="Duplicate ticket" style="width: 30px; height: 30px;">
+              <i data-lucide="copy" style="width: 14px; height: 14px;"></i>
+            </button>
+            <button type="button" class="btn-icon" id="btn-drawer-delete" title="Delete ticket" style="width: 30px; height: 30px; color: var(--danger);">
+              <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+            </button>
+            <button type="button" class="btn-icon" id="btn-drawer-close" title="Close drawer (Esc)" style="width: 30px; height: 30px;">
+              <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Inline Editable Title -->
+        <div style="position: relative;">
+          <input type="text" id="drawer-title-input" class="header-search-input" style="font-size: 1.125rem; font-weight: 700; height: 38px; padding: 0 8px;" maxlength="120">
+          <span id="drawer-title-saved" style="position: absolute; right: 8px; top: 10px; font-size: 0.6875rem; font-weight: 600; color: var(--success); opacity: 0; transition: opacity var(--transition-fast);">Saved</span>
+        </div>
+      </div>
+
+      <!-- Quick Props (Status, Priority, Category, Assignee) -->
+      <div style="padding: 12px 20px; background: var(--bg-subtle); border-bottom: 1px solid var(--border-base); display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div>
+          <label style="font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Status</label>
+          <select id="drawer-status-select" class="form-select" style="height: 32px; font-size: 0.8125rem; padding: 0 8px; margin-top: 2px;">
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Priority</label>
+          <select id="drawer-priority-select" class="form-select" style="height: 32px; font-size: 0.8125rem; padding: 0 8px; margin-top: 2px;">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Category</label>
+          <select id="drawer-category-select" class="form-select" style="height: 32px; font-size: 0.8125rem; padding: 0 8px; margin-top: 2px;">
+            <option value="bug">Bug Report</option>
+            <option value="billing">Billing & Payment</option>
+            <option value="feature_request">Feature Request</option>
+            <option value="general">General Inquiry</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Assignee</label>
+          <input type="text" id="drawer-assignee-input" class="header-search-input" style="height: 32px; font-size: 0.8125rem; padding: 0 8px; margin-top: 2px;" placeholder="(Unassigned)">
+        </div>
+      </div>
+
+      <!-- Drawer Scrollable Body -->
+      <div style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px;">
+        <!-- Description (Inline editable) -->
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Description</span>
+            <span style="font-size: 0.6875rem; color: var(--text-muted);">(Click to edit)</span>
+          </div>
+          <div id="drawer-desc-view" style="font-size: 0.875rem; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-base); cursor: pointer;">
+            <!-- Ticket description -->
+          </div>
+          <div id="drawer-desc-edit" hidden style="display: flex; flex-direction: column; gap: 8px;">
+            <textarea id="drawer-desc-textarea" rows="4" class="form-textarea" style="font-size: 0.875rem;"></textarea>
+            <div style="display: flex; justify-content: flex-end; gap: 6px;">
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-drawer-cancel-desc">Cancel</button>
+              <button type="button" class="btn btn-primary btn-sm" id="btn-drawer-save-desc">Save (Ctrl+Enter)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metadata Overview -->
+        <dl style="display: grid; grid-template-columns: 110px 1fr; row-gap: 6px; font-size: 0.8125rem;">
+          <dt style="color: var(--text-muted);">Requester:</dt>
+          <dd id="drawer-requester-val" style="color: var(--text-primary); font-weight: 500;">—</dd>
+          <dt style="color: var(--text-muted);">Created:</dt>
+          <dd id="drawer-created-val" style="color: var(--text-primary);">—</dd>
+          <dt style="color: var(--text-muted);">Last Updated:</dt>
+          <dd id="drawer-updated-val" style="color: var(--text-primary);">—</dd>
+        </dl>
+
+        <!-- Tabs: Comments vs Activity -->
+        <div>
+          <div class="drawer-tabs">
+            <button type="button" class="drawer-tab-btn active" id="drawer-tab-comments">
+              Comments (<span id="drawer-comments-count-badge">0</span>)
+            </button>
+            <button type="button" class="drawer-tab-btn" id="drawer-tab-activity">
+              Activity Timeline
+            </button>
+          </div>
+
+          <!-- Comments Panel -->
+          <div id="drawer-panel-comments" style="display: flex; flex-direction: column; gap: 12px; margin-top: 14px;">
+            <div id="drawer-comments-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+
+            <!-- Add Comment Form with Markdown Support -->
+            <form id="drawer-form-add-comment" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+              <input type="text" id="drawer-comment-author" class="header-search-input" placeholder="Your name or agent handle *" required style="height: 32px; font-size: 0.8125rem;">
+              <textarea id="drawer-comment-msg" class="form-textarea" rows="3" placeholder="Write a comment… (Markdown supported: **bold**, *italic*, `code`, [link](url))" required maxlength="1000" style="font-size: 0.8125rem;"></textarea>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.6875rem; color: var(--text-muted);" id="drawer-comment-count">0/1000</span>
+                <button type="submit" class="btn btn-primary btn-sm" id="btn-drawer-post-comment">
+                  <span>Post Comment</span>
+                  <span style="font-size: 0.6875rem; opacity: 0.8;">(Ctrl+↵)</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Activity Timeline Panel -->
+          <div id="drawer-panel-activity" hidden style="margin-top: 14px;">
+            <div class="activity-timeline" id="drawer-activity-timeline"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- =========================================================================
+       New Ticket Modal
+       ========================================================================= -->
+  <div class="modal-backdrop" id="modal-create-backdrop" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-create-title">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-create-title">Create Support Ticket</h2>
+        <button type="button" class="btn-icon" data-close-modal="modal-create-backdrop" aria-label="Close modal">
+          <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+        </button>
+      </div>
+
+      <form id="form-create-ticket" novalidate>
+        <div class="modal-body">
+          <!-- Template selector -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--bg-subtle); border-radius: var(--radius-md);">
+            <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);">Template (optional):</span>
+            <select id="create-template-select" class="form-select" style="height: 28px; font-size: 0.75rem; width: auto; padding: 0 8px;">
+              <option value="">(None — Blank)</option>
+              <option value="bug">Bug Report</option>
+              <option value="billing">Billing Issue</option>
+              <option value="feature_request">Feature Request</option>
+            </select>
+          </div>
+
+          <!-- Title -->
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between;">
+              <label for="create-title" style="font-size: 0.8125rem; font-weight: 600;">Title <span style="color:var(--danger)">*</span></label>
+              <span id="create-title-count" style="font-size: 0.75rem; color: var(--text-muted);">0/120</span>
+            </div>
+            <input type="text" id="create-title" class="header-search-input" required minlength="5" maxlength="120" placeholder="e.g. Inability to export analytics CSV" style="height: 38px;">
+            <span class="form-error-msg" id="create-title-error" hidden style="color: var(--danger); font-size: 0.75rem;"></span>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between;">
+              <label for="create-description" style="font-size: 0.8125rem; font-weight: 600;">Description <span style="color:var(--danger)">*</span></label>
+              <span id="create-desc-count" style="font-size: 0.75rem; color: var(--text-muted);">0/2000</span>
+            </div>
+            <textarea id="create-description" class="form-textarea" rows="4" required maxlength="2000" placeholder="Detail the problem, steps, or request…"></textarea>
+            <span class="form-error-msg" id="create-desc-error" hidden style="color: var(--danger); font-size: 0.75rem;"></span>
+          </div>
+
+          <!-- Priority & Category -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label for="create-priority" style="font-size: 0.8125rem; font-weight: 600;">Priority</label>
+              <select id="create-priority" class="form-select" style="height: 38px;">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+            <div>
+              <label for="create-category" style="font-size: 0.8125rem; font-weight: 600;">Category</label>
+              <select id="create-category" class="form-select" style="height: 38px;">
+                <option value="general" selected>General</option>
+                <option value="bug">Bug Report</option>
+                <option value="billing">Billing & Payment</option>
+                <option value="feature_request">Feature Request</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Requester Name & Email -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label for="create-requester-name" style="font-size: 0.8125rem; font-weight: 600;">Requester Name <span style="color:var(--danger)">*</span></label>
+              <input type="text" id="create-requester-name" class="header-search-input" required placeholder="Alex Mercer" style="height: 38px;">
+              <span class="form-error-msg" id="create-name-error" hidden style="color: var(--danger); font-size: 0.75rem;"></span>
+            </div>
+            <div>
+              <label for="create-requester-email" style="font-size: 0.8125rem; font-weight: 600;">Requester Email <span style="color:var(--danger)">*</span></label>
+              <input type="email" id="create-requester-email" class="header-search-input" required placeholder="alex@company.com" style="height: 38px;">
+              <span class="form-error-msg" id="create-email-error" hidden style="color: var(--danger); font-size: 0.75rem;"></span>
+            </div>
+          </div>
+
+          <!-- Assignee -->
+          <div>
+            <label for="create-assignee" style="font-size: 0.8125rem; font-weight: 600;">Assignee (optional)</label>
+            <input type="text" id="create-assignee" class="header-search-input" placeholder="Sarah Engineer" style="height: 38px;">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="modal-create-backdrop">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-create-submit">
+            <span class="btn-spinner" hidden></span>
+            <span>Create Ticket</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       Delete Confirmation Modal
+       ========================================================================= -->
+  <div class="modal-backdrop" id="modal-delete-backdrop" hidden>
+    <div class="modal-dialog modal-dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="modal-delete-title">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-delete-title" style="color: var(--danger);">Delete Ticket</h2>
+        <button type="button" class="btn-icon" data-close-modal="modal-delete-backdrop" aria-label="Close modal">
+          <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5;">
+          Are you sure you want to delete ticket <strong id="delete-ticket-num-text"></strong>?
+          You will have 6 seconds to undo this action.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="modal-delete-backdrop">Cancel</button>
+        <button type="button" class="btn btn-danger" id="btn-confirm-delete">Delete Ticket</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       Keyboard Shortcuts Help Modal (?)
+       ========================================================================= -->
+  <div class="modal-backdrop" id="modal-shortcuts-backdrop" hidden>
+    <div class="modal-dialog modal-dialog-sm" role="dialog" aria-modal="true" aria-labelledby="modal-shortcuts-title">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-shortcuts-title">Keyboard Shortcuts</h2>
+        <button type="button" class="btn-icon" data-close-modal="modal-shortcuts-backdrop" aria-label="Close modal">
+          <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span>Search tickets</span><kbd class="search-shortcut">/</kbd></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span>Command Palette</span><kbd class="search-shortcut">⌘K / Ctrl+K</kbd></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span>New Ticket</span><kbd class="search-shortcut">N</kbd></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span>Move focus down</span><kbd class="search-shortcut">J or ↓</kbd></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span>Move focus up</span><kbd class="search-shortcut">K or ↑</kbd></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span>Open focused ticket</span><kbd class="search-shortcut">Enter</kbd></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span>Select / Toggle row</span><kbd class="search-shortcut">X</kbd></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span>Edit ticket</span><kbd class="search-shortcut">E</kbd></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span>Close overlay</span><kbd class="search-shortcut">Esc</kbd></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span>Open this help</span><kbd class="search-shortcut">?</kbd></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       Command Palette (Ctrl/Cmd+K)
+       ========================================================================= -->
+  <div class="command-palette-backdrop" id="command-palette-backdrop" hidden>
+    <div class="command-palette-modal">
+      <div class="palette-search-wrap">
+        <i data-lucide="search" style="width: 18px; height: 18px; color: var(--text-muted);"></i>
+        <input type="text" id="palette-input" class="palette-search-input" placeholder="Type a command, search saved views, or jump to a ticket…" autocomplete="off">
+        <kbd class="search-shortcut">Esc</kbd>
+      </div>
+      <div class="palette-results-list" id="palette-results-list"></div>
+      <div class="palette-footer">
+        <span>Use <kbd class="search-shortcut" style="position:static;">↑</kbd> <kbd class="search-shortcut" style="position:static;">↓</kbd> to navigate</span>
+        <span>Press <kbd class="search-shortcut" style="position:static;">↵</kbd> to select</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       Toasts Stack
+       ========================================================================= -->
+  <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Application Entry Point (ES Module) -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

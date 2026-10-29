@@ -1,0 +1,1091 @@
+/* ==========================================================================
+   Components Stylesheet — Luxury "Emerald & Champagne" Theme
+   Buttons, Badges, Table, Kanban, Drawer, Modals, Command Palette, Toasts.
+   Strictly variables only — zero hard-coded colors.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Buttons & Controls
+   -------------------------------------------------------------------------- */
+.btn {
+  height: var(--density-btn-height);
+  padding: 0 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-sm {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Primary Button: Champagne gradient (Dark) / Emerald gradient (Light) */
+.btn-primary {
+  background: var(--primary-btn-bg);
+  color: var(--primary-btn-color);
+  border: 1px solid var(--accent-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), var(--shadow-sm);
+  font-weight: 600;
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), var(--glow);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Secondary & Ghost Buttons */
+.btn-secondary {
+  background-color: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--surface-2);
+  border-color: var(--accent-border);
+  color: var(--text);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--surface-2);
+  color: var(--text);
+  border-color: var(--accent-border);
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: var(--text-inverse);
+  border: 1px solid var(--danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: var(--danger-hover);
+  border-color: var(--danger-hover);
+}
+
+.btn-icon {
+  width: var(--density-btn-height);
+  height: var(--density-btn-height);
+  padding: 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.btn-icon:hover {
+  background-color: var(--surface-2);
+  color: var(--text);
+  border-color: var(--accent-border);
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--text-inverse);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --------------------------------------------------------------------------
+   2. Inputs & Form Controls
+   -------------------------------------------------------------------------- */
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="date"],
+select,
+textarea {
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  padding: 8px 12px;
+  font-size: 0.8125rem;
+  transition: all var(--transition-fast);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+}
+
+/* --------------------------------------------------------------------------
+   3. Badges: Pill shape, color at 14% opacity, adjusted text, 6px dot
+   -------------------------------------------------------------------------- */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-interactive {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.badge-interactive:hover {
+  filter: brightness(1.08);
+  border-color: var(--accent-border);
+  transform: translateY(-1px);
+}
+
+/* Status Badges */
+.badge-status-open {
+  background-color: color-mix(in srgb, var(--status-open) 14%, transparent);
+  border-color: color-mix(in srgb, var(--status-open) 26%, transparent);
+  color: var(--badge-text-open);
+}
+.badge-status-open .badge-dot { background-color: var(--status-open); }
+
+.badge-status-in_progress {
+  background-color: color-mix(in srgb, var(--status-in-progress) 14%, transparent);
+  border-color: color-mix(in srgb, var(--status-in-progress) 26%, transparent);
+  color: var(--badge-text-in-progress);
+}
+.badge-status-in_progress .badge-dot { background-color: var(--status-in-progress); }
+
+.badge-status-resolved {
+  background-color: color-mix(in srgb, var(--status-resolved) 14%, transparent);
+  border-color: color-mix(in srgb, var(--status-resolved) 26%, transparent);
+  color: var(--badge-text-resolved);
+}
+.badge-status-resolved .badge-dot { background-color: var(--status-resolved); }
+
+.badge-status-closed {
+  background-color: color-mix(in srgb, var(--status-closed) 14%, transparent);
+  border-color: color-mix(in srgb, var(--status-closed) 26%, transparent);
+  color: var(--badge-text-closed);
+}
+.badge-status-closed .badge-dot { background-color: var(--status-closed); }
+
+/* Priority Badges */
+.badge-priority-low {
+  background-color: color-mix(in srgb, var(--priority-low) 14%, transparent);
+  border-color: color-mix(in srgb, var(--priority-low) 26%, transparent);
+  color: var(--badge-text-low);
+}
+.badge-priority-low .badge-dot { background-color: var(--priority-low); }
+
+.badge-priority-medium {
+  background-color: color-mix(in srgb, var(--priority-medium) 14%, transparent);
+  border-color: color-mix(in srgb, var(--priority-medium) 26%, transparent);
+  color: var(--badge-text-medium);
+}
+.badge-priority-medium .badge-dot { background-color: var(--priority-medium); }
+
+.badge-priority-high {
+  background-color: color-mix(in srgb, var(--priority-high) 14%, transparent);
+  border-color: color-mix(in srgb, var(--priority-high) 26%, transparent);
+  color: var(--badge-text-high);
+}
+.badge-priority-high .badge-dot { background-color: var(--priority-high); }
+
+.badge-priority-urgent {
+  background-color: color-mix(in srgb, var(--priority-urgent) 14%, transparent);
+  border-color: color-mix(in srgb, var(--priority-urgent) 26%, transparent);
+  color: var(--badge-text-urgent);
+}
+.badge-priority-urgent .badge-dot { background-color: var(--priority-urgent); }
+
+/* Category Tag */
+.category-tag {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+/* Overdue Due Date Chip */
+.due-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background-color: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.due-chip.is-overdue {
+  background-color: var(--alert-overdue-bg);
+  border-color: var(--alert-overdue-border);
+  color: var(--alert-overdue-text);
+  font-weight: 600;
+}
+
+/* Avatars */
+.avatar-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--text-inverse);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Filter Chip */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.chip-remove-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chip-remove-btn:hover {
+  color: var(--danger);
+}
+
+/* --------------------------------------------------------------------------
+   4. Table View: Sticky header on --surface-2, row hover/select = --accent-soft
+   -------------------------------------------------------------------------- */
+.table-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: border-color 150ms ease;
+}
+
+.table-card:hover {
+  border-color: var(--accent-border);
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tickets-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tickets-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.tickets-table th {
+  padding: 12px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.th-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.th-sortable:hover {
+  color: var(--text);
+}
+
+.sort-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.75rem;
+  opacity: 0.4;
+}
+
+.sort-arrow.active {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.tickets-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background-color var(--transition-fast);
+  cursor: pointer;
+  height: var(--density-table-row);
+}
+
+.tickets-table tbody tr:hover {
+  background-color: var(--accent-soft);
+}
+
+.tickets-table tbody tr.row-selected {
+  background-color: var(--accent-soft);
+}
+
+.tickets-table tbody tr.row-selected td:first-child {
+  border-left: 2px solid var(--accent);
+}
+
+.tickets-table tbody tr.row-focused {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.tickets-table td {
+  padding: var(--density-table-padding-y) var(--density-table-padding-x);
+  font-size: 0.8125rem;
+  vertical-align: middle;
+  color: var(--text);
+}
+
+.ticket-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.cell-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 360px;
+}
+
+.cell-ticket-title {
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cell-requester-sub {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-row-action {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.btn-row-action:hover {
+  background-color: var(--surface-2);
+  color: var(--text);
+  border-color: var(--accent-border);
+}
+
+.btn-row-action.action-delete:hover {
+  background-color: var(--danger-subtle);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* Compact List View Mode */
+.compact-list-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.compact-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.compact-item:hover {
+  background-color: var(--accent-soft);
+}
+
+.compact-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.compact-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   5. Kanban Board
+   Columns on --surface-2, cards on --surface with 3px left edge in priority color.
+   Champagne dashed drop-zone highlight during drag.
+   -------------------------------------------------------------------------- */
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.kanban-column {
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 480px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.kanban-column.drag-over {
+  border-color: var(--accent);
+  background-color: var(--accent-soft);
+}
+
+.kanban-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.kanban-col-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.kanban-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 380px;
+}
+
+.kanban-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: grab;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.kanban-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-md), var(--glow);
+}
+
+.kanban-card.is-dragging {
+  opacity: 0.35;
+  transform: scale(0.97);
+}
+
+.ghost-drop-card {
+  height: 60px;
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius-md);
+  background-color: var(--accent-soft);
+  pointer-events: none;
+}
+
+/* Priority Left Borders on Kanban Cards */
+.kanban-card-prio-low { border-left-color: var(--priority-low); }
+.kanban-card-prio-medium { border-left-color: var(--priority-medium); }
+.kanban-card-prio-high { border-left-color: var(--priority-high); }
+.kanban-card-prio-urgent { border-left-color: var(--priority-urgent); }
+
+/* --------------------------------------------------------------------------
+   6. Floating Bulk Action Bar
+   -------------------------------------------------------------------------- */
+.bulk-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  z-index: var(--z-sticky);
+  background-color: var(--surface-2);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-xl), var(--glow);
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform var(--transition-base);
+}
+
+.bulk-bar.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.bulk-count-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--primary-btn-bg);
+  color: var(--primary-btn-color);
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+}
+
+.bulk-divider {
+  width: 1px;
+  height: 20px;
+  background-color: var(--border);
+}
+
+/* --------------------------------------------------------------------------
+   7. Ticket Drawer (Slide-in) & Activity Timeline
+   Glass blur backdrop (rgba(7,16,14,.6)), 1px --accent-border outline, slide-in 200ms
+   -------------------------------------------------------------------------- */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-drawer);
+  background-color: rgba(7, 16, 14, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms ease, visibility 200ms ease;
+}
+
+.drawer-backdrop:not([hidden]) {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ticket-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 580px;
+  background-color: var(--surface);
+  box-shadow: var(--shadow-drawer);
+  border-left: 1px solid var(--accent-border);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawer-backdrop:not([hidden]) .ticket-drawer {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawer-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.drawer-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.drawer-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--surface-2);
+}
+
+.drawer-tab-btn {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.drawer-tab-btn:hover {
+  color: var(--text);
+}
+
+.drawer-tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.drawer-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Activity Timeline */
+.activity-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  padding-left: 20px;
+}
+
+.activity-timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background-color: var(--border);
+}
+
+.activity-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.activity-dot {
+  position: absolute;
+  left: -20px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--accent);
+  border: 2px solid var(--surface);
+}
+
+.activity-desc {
+  font-size: 0.8125rem;
+  color: var(--text);
+}
+
+.activity-time {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   8. Command Palette (Ctrl/Cmd+K)
+   Glass-blur backdrop (rgba(7,16,14,.6)), 1px --accent-border outline, scale-in 200ms.
+   Active item gets --accent-soft with a --accent left edge.
+   -------------------------------------------------------------------------- */
+.command-palette-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-command);
+  background-color: rgba(7, 16, 14, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms ease, visibility 200ms ease;
+}
+
+.command-palette-backdrop:not([hidden]) {
+  opacity: 1;
+  visibility: visible;
+}
+
+.command-palette-modal {
+  width: 100%;
+  max-width: 580px;
+  background-color: var(--surface);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-xl), var(--glow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.96) translateY(6px);
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.command-palette-backdrop:not([hidden]) .command-palette-modal {
+  transform: scale(1) translateY(0);
+}
+
+.palette-search-wrap {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+
+.palette-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+}
+
+.palette-results-list {
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.palette-group-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 6px 10px 2px;
+}
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  color: var(--text);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background-color var(--transition-fast), border-left-color var(--transition-fast);
+}
+
+.palette-item:hover, .palette-item.active {
+  background-color: var(--accent-soft);
+  color: var(--text);
+  border-left-color: var(--accent);
+}
+
+.palette-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.palette-footer {
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  background-color: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   9. Modals & Forms
+   Glass-blur backdrop (rgba(7,16,14,.6)), 1px --accent-border outline, scale-in 200ms
+   -------------------------------------------------------------------------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background-color: rgba(7, 16, 14, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms ease, visibility 200ms ease;
+}
+
+.modal-backdrop:not([hidden]) {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-dialog {
+  background-color: var(--surface);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-xl), var(--glow);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.96) translateY(8px);
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-backdrop:not([hidden]) .modal-dialog {
+  transform: scale(1) translateY(0);
+}
+
+.modal-dialog-sm {
+  max-width: 440px;
+}
+
+.modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--border);
+  background-color: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   10. Toasts with Colored Left Edge & Thin Progress Bar
+   -------------------------------------------------------------------------- */
+.toast-stack {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  max-width: 380px;
+  width: calc(100% - 48px);
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.toast-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.toast-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background-color: var(--accent);
+  width: 100%;
+}
+
+.toast-success { border-left-color: var(--status-resolved); }
+.toast-success i { color: var(--status-resolved); }
+
+.toast-error { border-left-color: var(--priority-urgent); }
+.toast-error i { color: var(--priority-urgent); }
+
+.toast-info { border-left-color: var(--accent); }
+.toast-info i { color: var(--accent); }
+
+.toast-undo-btn {
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+  text-decoration: underline;
+}
+
+/* Inline Edit Popover on Table Badges */
+.inline-badge-popover {
+  position: absolute;
+  z-index: var(--z-popover);
+  background-color: var(--surface-2);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 130px;
+}
+
+.popover-item {
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+}
+
+.popover-item:hover {
+  background-color: var(--accent-soft);
+}

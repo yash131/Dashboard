@@ -1,0 +1,109 @@
+/* ==========================================================================
+   Animations & Transitions — Luxury "Emerald & Champagne" Theme
+   Smooth micro-interactions, shimmer, popover fades, reduced-motion honor.
+   ========================================================================== */
+
+/* Shimmer Loading: --surface-2 base with a highlight sweep of --border (not white) */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton, .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 20%,
+    var(--border) 50%,
+    var(--surface-2) 80%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite ease-in-out;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-text {
+  height: 12px;
+  width: 100%;
+  margin: 4px 0;
+}
+
+.skeleton-badge {
+  height: 20px;
+  width: 70px;
+  border-radius: var(--radius-full);
+}
+
+.skeleton-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+/* Toast Animations */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.toast {
+  animation: toastIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.toast.toast-hiding {
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+}
+
+@keyframes progressShrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.toast-progress-bar {
+  animation: progressShrink linear forwards;
+}
+
+/* Modal Animations */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Row Shake on invalid transition */
+@keyframes shakeRow {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.shake-animation {
+  animation: shakeRow 0.4s ease-in-out;
+}
+
+/* Pulse indicator */
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.6; }
+}
+
+/* Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,184 @@
+/* ==========================================================================
+   Design Tokens & CSS Variables — Luxury "Emerald & Champagne" Theme
+   ========================================================================== */
+
+:root[data-theme="dark"] {
+  --bg: #07100E;
+  --surface: #0E1A17;
+  --surface-2: #142420;
+  --border: #21362F;
+  --text: #EEF3EF;
+  --text-muted: #8FA39A;
+  --accent: #D8B979;
+  --accent-hover: #E8CC96;
+  --on-accent: #14100A;
+  --secondary: #1F8A6B;
+
+  --primary-btn-bg: var(--champagne-gradient);
+  --primary-btn-color: var(--on-accent);
+  --chart-resolved: #1F8A6B;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.40);
+
+  /* Badge text contrast adjustments in dark mode for WCAG AA */
+  --badge-text-open: #8CA4FF;
+  --badge-text-in-progress: #F3CA7E;
+  --badge-text-resolved: #66C59E;
+  --badge-text-closed: #ADB2BF;
+
+  --badge-text-low: #ADB2BF;
+  --badge-text-medium: #8CA4FF;
+  --badge-text-high: #F3A46D;
+  --badge-text-urgent: #F37D86;
+}
+
+:root[data-theme="light"] {
+  --bg: #F6F4EE;
+  --surface: #FFFFFF;
+  --surface-2: #EEEBE2;
+  --border: #E0DCCD;
+  --text: #14211C;
+  --text-muted: #5E6E66;
+  --accent: #0F5F4A;
+  --accent-hover: #0B4938;
+  --on-accent: #FFFFFF;
+  --secondary: #B8975A;
+
+  --primary-btn-bg: var(--emerald-gradient);
+  --primary-btn-color: #FFFFFF;
+  --chart-resolved: #B8975A;
+
+  --shadow-sm: 0 1px 3px rgba(20, 33, 28, 0.06);
+  --shadow-md: 0 8px 30px rgba(20, 33, 28, 0.08);
+
+  /* Badge text in light mode for WCAG AA */
+  --badge-text-open: #2A48C5;
+  --badge-text-in-progress: #8D5E12;
+  --badge-text-resolved: #166447;
+  --badge-text-closed: #4C5261;
+
+  --badge-text-low: #4C5261;
+  --badge-text-medium: #2A48C5;
+  --badge-text-high: #96470E;
+  --badge-text-urgent: #9F1722;
+}
+
+:root {
+  /* Derived tokens */
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --accent-border: color-mix(in srgb, var(--accent) 35%, transparent);
+  --champagne-gradient: linear-gradient(135deg, #EAD6A4 0%, #D8B979 50%, #B8975A 100%);  /* dark mode primary buttons */
+  --emerald-gradient: linear-gradient(135deg, #1F8A6B 0%, #0F5F4A 100%);                 /* light mode primary buttons */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.40);       /* softer in light mode */
+  --glow: 0 0 0 1px var(--accent-border), 0 0 24px color-mix(in srgb, var(--accent) 14%, transparent);
+  --radius: 14px;
+
+  /* Status colors (muted jewel tones) */
+  --status-open: #5B7CFA;
+  --status-in-progress: #D4A24C;
+  --status-resolved: #3FA37C;
+  --status-closed: #7A7F8C;
+
+  /* Priority colors */
+  --priority-low: #7A7F8C;
+  --priority-medium: #5B7CFA;
+  --priority-high: #D9803F;
+  --priority-urgent: #D64550;
+
+  /* Typography */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* Radii scale */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --radius-full: 9999px;
+
+  /* Aliases mapped to Emerald & Champagne tokens */
+  --primary: var(--accent);
+  --primary-hover: var(--accent-hover);
+  --primary-active: var(--accent-hover);
+  --primary-subtle: var(--accent-soft);
+  --primary-ring: var(--accent-border);
+  --primary-contrast: var(--on-accent);
+  --primary-gradient: var(--primary-btn-bg);
+
+  --bg-app: var(--bg);
+  --bg-surface: var(--surface);
+  --bg-surface-elevated: var(--surface);
+  --bg-subtle: var(--surface-2);
+  --bg-hover: var(--accent-soft);
+  --bg-active: var(--surface-2);
+  --bg-glass: color-mix(in srgb, var(--bg) 75%, transparent);
+
+  --border-subtle: var(--border);
+  --border-base: var(--border);
+  --border-hover: var(--accent-border);
+  --border-focus: var(--accent);
+
+  --text-primary: var(--text);
+  --text-secondary: var(--text-muted);
+  --text-inverse: var(--on-accent);
+
+  --danger: var(--priority-urgent);
+  --danger-hover: #B91C1C;
+  --danger-subtle: color-mix(in srgb, var(--priority-urgent) 14%, transparent);
+  --danger-ring: color-mix(in srgb, var(--priority-urgent) 30%, transparent);
+
+  --success: var(--status-resolved);
+  --success-hover: #2E8B65;
+  --success-subtle: color-mix(in srgb, var(--status-resolved) 14%, transparent);
+
+  --alert-overdue: var(--priority-urgent);
+  --alert-overdue-bg: color-mix(in srgb, var(--priority-urgent) 14%, transparent);
+  --alert-overdue-border: color-mix(in srgb, var(--priority-urgent) 35%, transparent);
+  --alert-overdue-text: var(--badge-text-urgent);
+
+  /* Shadows */
+  --shadow-xs: var(--shadow-sm);
+  --shadow-lg: var(--shadow-md);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --shadow-drawer: -10px 0 30px rgba(0, 0, 0, 0.35);
+  --shadow-popover: var(--shadow-md);
+
+  /* Z-Index Hierarchy */
+  --z-base: 1;
+  --z-sticky: 40;
+  --z-header: 50;
+  --z-popover: 60;
+  --z-drawer: 80;
+  --z-modal: 90;
+  --z-command: 100;
+  --z-toast: 110;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-base: 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 300ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Density: Comfortable (default) */
+  --density-table-row: 52px;
+  --density-table-padding-y: 12px;
+  --density-table-padding-x: 16px;
+  --density-card-padding: 16px;
+  --density-btn-height: 38px;
+  --density-input-height: 38px;
+  --density-gap: 16px;
+}
+
+/* Density: Compact */
+[data-density="compact"] {
+  --density-table-row: 40px;
+  --density-table-padding-y: 8px;
+  --density-table-padding-x: 12px;
+  --density-card-padding: 12px;
+  --density-btn-height: 32px;
+  --density-input-height: 32px;
+  --density-gap: 10px;
+}
